@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Octree, OrbitControls } from 'three/examples/jsm/Addons.js'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
+import { PointerLockControls } from 'three/examples/jsm/Addons.js'
 
 interface GUISetType {
     globalGUI: GUI
@@ -35,12 +36,15 @@ export class ThreeBase {
     scene: THREE.Scene
     camera: THREE.PerspectiveCamera
     renderer: THREE.WebGLRenderer
-    controls: OrbitControls
+    controls?: OrbitControls | PointerLockControls
+    orbitControls?:OrbitControls
+    pointerLockControls:PointerLockControls
     // groupSet: GroupExt = {} as GroupExt
     GUISet: GUISetType
     stats = new Stats()
     worldOctree = new Octree()
     lightSet: LightSet
+    axes:THREE.AxesHelper
     constructor(
         public cameraConfig: CameraConfig,
         public domElement: HTMLElement
@@ -49,8 +53,10 @@ export class ThreeBase {
         this.scene = this.initScene()
         this.camera = this.initCamera()
         this.renderer = this.initRenderer()
-        this.controls = this.initControls()
+        // this.orbitControls = this.initControls()
+        this.pointerLockControls = this.initPointerLockControls()
         this.lightSet = this.initLight()
+        this.axes =  this.initAxes()
     }
     private initGUI = () => {
         const GUISet = {} as GUISetType
@@ -199,6 +205,11 @@ export class ThreeBase {
         // controls.maxDistance = 80
         return controls
     }
+    private initPointerLockControls(){
+        const {camera,renderer} = this
+        const controls = new PointerLockControls(camera,renderer.domElement)
+        return controls
+    }
     private initLight() {
         const {scene} = this
         const lightSet = {} as LightSet
@@ -206,5 +217,15 @@ export class ThreeBase {
         lightSet.hemiLight = new THREE.HemisphereLight('#fff','#444',1)
 
         return lightSet
+    }
+    private initAxes() {
+        // 坐标轴
+        const { GUISet,scene } = this
+        const axesHelper = new THREE.AxesHelper(5)
+        axesHelper.visible = false
+        axesHelper.name = 'axesHelper'
+        GUISet.helperGUI.add(axesHelper, 'visible').name('axesHelper')
+        scene.add(axesHelper)
+        return axesHelper
     }
 }
