@@ -93,13 +93,19 @@ export class ThreeScene extends ThreeBase {
         document.body.addEventListener('mousedown', mousedown)
         document.body.addEventListener('mousemove', (event: MouseEvent) => {
             if (document.pointerLockElement === document.body) {
-                camera.rotation.y -= event.movementX / 500
-                camera.rotation.x -= event.movementY / 500
-                // pointer.x = (event.clientX / window.innerWidth) * 2 - 1
-                // pointer.y = -(event.clientY / window.innerHeight) * 2 + 1
+                const sensitivity = 500; // 旋转灵敏度
+                camera.rotation.y -= event.movementX / sensitivity
+                camera.rotation.x -= event.movementY / sensitivity
+                const maxYaw = Math.PI / 2; // 最大俯仰角
+                const minYaw = -Math.PI / 2; // 最小俯仰角
+                camera.rotation.x = Math.max(minYaw, Math.min(maxYaw, camera.rotation.x));
+                camera.updateProjectionMatrix();
+
                 mousemove(event)
             }
         })
+
+
 
         renderer.domElement.addEventListener('mousedown', (event) => {
             event.stopPropagation()
@@ -121,7 +127,7 @@ export class ThreeScene extends ThreeBase {
         scene.add(camera)
         camera.rotation.order = 'YXZ'
 
-        this.controls = this.pointerLockControls
+        // this.controls = this.pointerLockControls
     }
 
     playerCollisions = () => {
